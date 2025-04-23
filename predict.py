@@ -12,9 +12,10 @@ def parse_args():
     # basic
     parser.add_argument('--datapath', type=str, default=r"D:\github_demo\dataset\pro_mix", help='Path to the dataset directory')
     parser.add_argument('--batchsize', type=int, default=1, help='Batch size for training and validation')
-    parser.add_argument('--checkpoints', type=str, default="./output/UStoMR.pth", help='Checkpoints for training')
+    parser.add_argument('--checkpoints', type=str, default="./output/MRtoUS.pth", help='Checkpoints for training')
     parser.add_argument('--save', type=bool, default=True, help='Directory to save model checkpoints')
-    parser.add_argument('--mode', type=str, default="UStoMR", choices=['MRtoUS', 'UStoMR'], help='MR-to-US registration or US-to-MR registration')
+    parser.add_argument('--mode', type=str, default="MRtoUS", choices=['MRtoUS', 'UStoMR'], help='MR-to-US registration or US-to-MR registration')
+    parser.add_argument('--augment', type=bool, default=False, help='Checkpoints for training')
     # model
     parser.add_argument('--base_chan', type=int, default=96, help='Base channel in model')
     parser.add_argument('--reduce_size', type=int, default=8, help='Reduction size for the model')
@@ -33,7 +34,7 @@ if __name__ == "__main__":
     now = datetime.now().strftime('%m-%d_%H-%M-%S')
     args = parse_args()
 
-    valid_data = TrainDataset(os.path.join(args.datapath, "val"), mode=args.mode)
+    valid_data = TrainDataset(os.path.join(args.datapath, "val"), mode=args.mode, augment=args.augment)
     valid_loader = DataLoader(dataset=valid_data, batch_size=args.batchsize, shuffle=False, num_workers=0)
 
     model = UTMorph(args.base_chan, reduce_size=args.reduce_size, block_list=args.block_list, num_blocks=[1, 1, 1, 1],

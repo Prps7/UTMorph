@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument('--batchsize', type=int, default=64, help='Batch size for training and validation')
     parser.add_argument('--checkpoints', type=str, default=None, help='Checkpoints for training')
     parser.add_argument('--mode', type=str, default="MRtoUS", choices=['MRtoUS', 'UStoMR'], help='MR-to-US registration or US-to-MR registration')
+    parser.add_argument('--augment', type=bool, default=True, help='Checkpoints for training')
     # model
     parser.add_argument('--base_chan', type=int, default=96, help='Base channel in model')
     parser.add_argument('--reduce_size', type=int, default=8, help='Reduction size for the model')
@@ -47,8 +48,8 @@ def forward(batch_data,model):
 if __name__ == "__main__":
     args = parse_args()
 
-    train_data = TrainDataset(os.path.join(args.datapath, "train"), mode=args.mode)
-    valid_data = TrainDataset(os.path.join(args.datapath, "val"), mode=args.mode)
+    train_data = TrainDataset(os.path.join(args.datapath, "train"), mode=args.mode, augment=args.augment)
+    valid_data = TrainDataset(os.path.join(args.datapath, "val"), mode=args.mode, augment=args.augment)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batchsize, shuffle=True, num_workers=0)
     valid_loader = DataLoader(dataset=valid_data, batch_size=args.batchsize, shuffle=False, num_workers=0)
 

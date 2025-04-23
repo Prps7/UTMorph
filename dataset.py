@@ -3,8 +3,9 @@ import numpy as np
 import torch.utils.data as Data
 import cv2
 import os
+import albumentations as A
 
-def load_data_pair(data_path, case_name, modality='mr'):
+def load_data_pair(data_path, case_name, modality='mr',augment=None):
     # Implement the function to load images and labels based on the case name and modality.
     image_path = os.path.join(data_path, f"{modality}_images", case_name)
     label_path = os.path.join(data_path, f"{modality}_labels", case_name)
@@ -25,6 +26,11 @@ def load_data_pair(data_path, case_name, modality='mr'):
         label = cv2.imread(label_full_path, cv2.IMREAD_GRAYSCALE)
         label = np.where(label < 120, 0, 1)
 
+        if augment is not None:
+            augmented = augment(image=image, mask=label)
+            image = augmented['image']
+            label = augmented['mask']
+
         image = np.reshape(image, (1,) + image.shape)
         label = np.reshape(label, (1,) + label.shape)
 
@@ -44,7 +50,7 @@ def _to_tensor(data_dict):
 class TrainDataset(Data.Dataset):
     'Characterizes a dataset for PyTorch'
 
-    def __init__(self, data_path, evaluate=False, mode="MRtoUS"):
+    def __init__(self, data_path, mode="MRtoUS",augment=None):
         'Initialization'
         super(TrainDataset, self).__init__()
         self.data_path = data_path
@@ -65,12 +71,31 @@ class TrainDataset(Data.Dataset):
         # Ensure the same cases exist in both modalities
         assert mr_cases == us_cases, "Cases do not match between modalities"
 
+        self.augment = augment
+        if self.augment:
+            self.mr_transform = A.Compose([
+                A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.1, rotate_limit=15, p=0.3),
+                A.RandomCrop(height=120, width=120, p=0.3),
+                A.Resize(height=128, width=128),
+                A.GaussNoise(var_limit=(10.0, 30.0), p=0.3),
+                A.Affine(shear=10, p=0.3)
+            ])
+            self.us_transform = A.Compose([
+                A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.1, rotate_limit=15, p=0.3),
+                A.RandomCrop(height=120, width=120, p=0.3),
+                A.Resize(height=128, width=128),
+                A.MultiplicativeNoise(multiplier=(0.9, 1.1), p=0.3),
+                A.Affine(shear=10, p=0.3)
+            ])
+        else:
+            self.mr_transform = None
+            self.us_transform = None
         # Pair images and labels with the same name across modalities
         self.filename = []
         for case in mr_cases:
             # Get image and label names for each case
-            (mr_images, mr_labels) = load_data_pair(self.data_path, case, modality='mr')
-            (us_images, us_labels) = load_data_pair(self.data_path, case, modality='us')
+            (mr_images, mr_labels) = load_data_pair(self.data_path, case, modality='mr', augment=self.mr_transform)
+            (us_images, us_labels) = load_data_pair(self.data_path, case, modality='us', augment=self.us_transform)
 
             # Ensure the same number of images and labels exists in both modalities
             assert len(mr_images) == len(us_images), "Different number of images for the case"
@@ -93,9 +118,6 @@ class TrainDataset(Data.Dataset):
         'Generates one sample of data'
         # Select sample
         fix_img, mov_img, fix_label, mov_label = self.filename[index]
-
-        # Create a dictionary to return
-
         data = {
             'fixed_image': fix_img,
             'moving_image': mov_img,
