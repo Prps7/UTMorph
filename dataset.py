@@ -44,7 +44,7 @@ def _to_tensor(data_dict):
 class TrainDataset(Data.Dataset):
     'Characterizes a dataset for PyTorch'
 
-    def __init__(self, data_path, evaluate=False):
+    def __init__(self, data_path, evaluate=False, mode="MRtoUS"):
         'Initialization'
         super(TrainDataset, self).__init__()
         self.data_path = data_path
@@ -77,7 +77,12 @@ class TrainDataset(Data.Dataset):
             assert len(mr_labels) == len(us_labels), "Different number of labels for the case"
 
             # Pair the images and labels
-            paired_data = list(zip(mr_images, us_images, mr_labels, us_labels))
+            if mode == "MRtoUS":
+                paired_data = list(zip(us_images, mr_images, us_labels, mr_labels))
+            elif mode == "UStoMR":
+                paired_data = list(zip(mr_images, us_images, mr_labels, us_labels))
+            else:
+                raise TypeError("Mode has to be 'MRtoUS' or 'UStoMR'")
             self.filename.extend(paired_data)
 
     def __len__(self):

@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument('--datapath', type=str, default=r"D:\github_demo\dataset\pro_mix", help='Path to the dataset directory')
     parser.add_argument('--batchsize', type=int, default=64, help='Batch size for training and validation')
     parser.add_argument('--checkpoints', type=str, default=None, help='Checkpoints for training')
+    parser.add_argument('--mode', type=str, default="MRtoUS", choices=['MRtoUS', 'UStoMR'], help='MR-to-US registration or US-to-MR registration')
     # model
     parser.add_argument('--base_chan', type=int, default=96, help='Base channel in model')
     parser.add_argument('--reduce_size', type=int, default=8, help='Reduction size for the model')
@@ -29,7 +30,7 @@ def parse_args():
     parser.add_argument('--epochs', type=int, default=300, help='Number of training epochs')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--alph', type=float, default=1, help='Weight for edge loss')
-    parser.add_argument('--beta', type=float, default=10, help='Weight for regularization loss')
+    parser.add_argument('--beta', type=float, default=1, help='Weight for regularization loss')
     parser.add_argument('--output_dir', type=str, default="./output", help='Directory to save model checkpoints')
     return parser.parse_args()
 
@@ -46,8 +47,8 @@ def forward(batch_data,model):
 if __name__ == "__main__":
     args = parse_args()
 
-    train_data = TrainDataset(os.path.join(args.datapath, "train"))
-    valid_data = TrainDataset(os.path.join(args.datapath, "val"))
+    train_data = TrainDataset(os.path.join(args.datapath, "train"), mode=args.mode)
+    valid_data = TrainDataset(os.path.join(args.datapath, "val"), mode=args.mode)
     train_loader = DataLoader(dataset=train_data, batch_size=args.batchsize, shuffle=True, num_workers=0)
     valid_loader = DataLoader(dataset=valid_data, batch_size=args.batchsize, shuffle=False, num_workers=0)
 
