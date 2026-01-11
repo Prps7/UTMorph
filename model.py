@@ -120,6 +120,7 @@ class UTMorph(nn.Module):
         return pos_flow
 
 
+
 if __name__ == "__main__":
 
     img_size = (2, 1, 128, 128)
@@ -130,6 +131,6 @@ if __name__ == "__main__":
     model = UTMorph(96, reduce_size=8, block_list="234", num_blocks=[1,1,1,1], num_heads=[4,4,4,4], projection='interp', attn_drop=0.1,
                   proj_drop=0.1, rel_pos=True, maxpool=True, feature=True, proj_att=True).to("cuda")
 
-    print(model)
+    # print(model)
     disp = model(fix_img_tensor,mov_img_tensor)
     print(disp.shape)

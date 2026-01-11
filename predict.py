@@ -12,9 +12,9 @@ def parse_args():
     # basic
     parser.add_argument('--datapath', type=str, default=r"D:\github_demo\dataset\pro_mix", help='Path to the dataset directory')
     parser.add_argument('--batchsize', type=int, default=1, help='Batch size for training and validation')
-    parser.add_argument('--checkpoints', type=str, default="./output/UStoMR_.pth", help='Checkpoints for training')
-    parser.add_argument('--save', type=bool, default=True, help='Directory to save model checkpoints')
-    parser.add_argument('--mode', type=str, default="UStoMR", choices=['MRtoUS', 'UStoMR'], help='MR-to-US registration or US-to-MR registration')
+    parser.add_argument('--checkpoints', type=str, default="./output/MRtoUS.pth", help='Checkpoints for training')
+    parser.add_argument('--save', type=bool, default=False, help='Directory to save model checkpoints')
+    parser.add_argument('--mode', type=str, default="MRtoUS", choices=['MRtoUS', 'UStoMR'], help='MR-to-US registration or US-to-MR registration')
     parser.add_argument('--augment', type=bool, default=False, help='Checkpoints for training')
     # model
     parser.add_argument('--base_chan', type=int, default=96, help='Base channel in model')

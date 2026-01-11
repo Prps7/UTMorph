@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument('--datapath', type=str, default=r"D:\github_demo\dataset\pro_mix", help='Path to the dataset directory')
     parser.add_argument('--batchsize', type=int, default=64, help='Batch size for training and validation')
     parser.add_argument('--checkpoints', type=str, default=None, help='Checkpoints for training')
-    parser.add_argument('--mode', type=str, default="UStoMR", choices=['MRtoUS', 'UStoMR'], help='MR-to-US registration or US-to-MR registration')
+    parser.add_argument('--mode', type=str, default="MRtoUS", choices=['MRtoUS', 'UStoMR'], help='MR-to-US registration or US-to-MR registration')
     parser.add_argument('--augment', type=bool, default=True, help='Checkpoints for training')
     # model
     parser.add_argument('--base_chan', type=int, default=96, help='Base channel in model')
@@ -56,6 +56,7 @@ if __name__ == "__main__":
     model = UTMorph(args.base_chan, reduce_size=args.reduce_size, block_list=args.block_list, num_blocks=[1,1,1,1], num_heads=[4,4,4,4],
                     projection=args.projection, attn_drop=args.attn_drop,proj_drop=args.proj_drop, rel_pos=args.rel_pos, maxpool=args.maxpool, feature=args.feature,
                        proj_att=args.proj_att).to("cuda")
+
 
     edgeloss = EdgeLoss()
     label_loss_fn = DiceLoss()
